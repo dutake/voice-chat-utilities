@@ -15,9 +15,9 @@ const {
   const Menu = getModule(["MenuGroup", "MenuItem"], false);
   const { getChannel } = getModule(["getChannel"], false);
   const { Plugin } = require("powercord/entities");
-  
+  const { getGuild } = getModule(["getGuild"], false);
   const { getVoiceChannelId } = getModule(['getVoiceChannelId'], false);
-
+const {getChannels} = getModule(['getChannels'], false);
   
   const getuser = require("powercord/webpack").getModule(
 	["getCurrentUser"],
@@ -28,26 +28,45 @@ const {
 	  const can = (await getModule(["can", "canEveryone"])).can;
 	  inject("voice-chat-utilities", ChannelContextMenu, "default", (args, res) => {
 		  
+
 		let user = getuser.getCurrentUser(); //the user
 		let channel = args[0].channel;
 		let channelmembers = this.getVoiceChannelMembers(channel.id);
+		
+
+
+
+		// let	x = Object.values(getModule([ 'getChannels' ], false).getChannels(channel.guild_id))[0];
+		// for (const value of x.values()) {
+		// 	console.log(value.channel.name);
+		//   }
+
+
+		
 		if (channelmembers.length < 1) return res;
 		if(channelmembers.length == 1 && channelmembers.includes(user.id)) return res;
 		if (!can(constants.Permissions.MOVE_MEMBERS, user, channel) && !can(constants.Permissions.MUTE_MEMBERS, user, channel) && !can(constants.Permissions.DEAFEN_MEMBERS, user, channel)) return res;
-           let currentChannel = this.getVoiceChannel();
+        let currentChannel = this.getVoiceChannel();
+	
+			
+			
+			
+			
+			
+			
 		let item = React.createElement(
 		  Menu.MenuItem,
 		  {
-			//Found out how to add stuff to this kinda menu from https://github.com/Twizzer/move-all-vc
+			
 			id: "mass-vc-tools-group-header",
 			label: "Mass voicechat tools",
 		  },
 		  can(constants.Permissions.MOVE_MEMBERS, user, channel) && React.createElement(Menu.MenuItem, {
-			//Found out how to add stuff to this kinda menu from https://github.com/Twizzer/move-all-vc
+			
 			action: async () => {
 			  for (const member of channelmembers) {
 				patch({
-				  url: constants.Endpoints.GUILD_MEMBER(channel.guild_id, member), //Found out how to move members from https://github.com/Twizzer/move-all-vc
+				  url: constants.Endpoints.GUILD_MEMBER(channel.guild_id, member), 
 				  body: {
 					channel_id: null,
 				  },
@@ -59,12 +78,12 @@ const {
 		  }, 
 		  
 		  getVoiceChannelId() == channel.id &&	currentChannel.members.length > 1 &&  React.createElement(Menu.MenuItem, {
-			//Found out how to add stuff to this kinda menu from https://github.com/Twizzer/move-all-vc
+			
 			action: async () => {
 			  for (const member of channelmembers) {
 				if (member == user.id) continue;
 				patch({
-				  url: constants.Endpoints.GUILD_MEMBER(channel.guild_id, member), //Found out how to move members from https://github.com/Twizzer/move-all-vc
+				  url: constants.Endpoints.GUILD_MEMBER(channel.guild_id, member), 
 				  body: {
 					channel_id: null,
 				  },
@@ -80,7 +99,39 @@ const {
 		 
 		  ),
 
-		  //if (member == user.id) continue;
+	// 	  can(constants.Permissions.MOVE_MEMBERS, user, channel) && 
+	// 	  React.createElement(Menu.MenuItem, {
+	// 		
+	// 		action: async () => {
+	// 		  for (const member of channelmembers) {
+	// 			patch({
+	// 			  url: constants.Endpoints.GUILD_MEMBER(channel.guild_id, member), 
+	// 			  body: {
+	// 				channel_id: null,
+	// 			  },
+	// 			});
+	// 		  }
+	// 		},
+	// 		id: "move-all-vc",
+	// 		label: "Move All",
+	// 		children:"" ,
+	//   } ),
+		  
+/// gonna save this code for later since im actually stupid af		 
+		 
+		 
+		  
+
+
+
+
+
+
+
+
+		  
+
+		  
 		  can(constants.Permissions.MUTE_MEMBERS, user, channel) &&  React.createElement(Menu.MenuItem, {
 			action: async () => {
 			  for (const member of channelmembers) {
@@ -213,6 +264,7 @@ const {
 		  )
 		);
 		let element = React.createElement(Menu.MenuGroup, null, item);
+		
 		res.props.children.push(element);
 		return res;
 	  });
