@@ -1,14 +1,5 @@
-const {
-	getModule,
-	getAllModules,
-	React,
-	constants,
-  } = require("powercord/webpack");
-  const ChannelContextMenu = getAllModules(
-	(m) =>
-	  m.default && m.default.displayName == "ChannelListVoiceChannelContextMenu",
-	false
-  )[0];
+const {	getModule,	getAllModules,	React,	constants,  } = require("powercord/webpack");
+  const ChannelContextMenu = getAllModules((m) =>m.default && m.default.displayName == "ChannelListVoiceChannelContextMenu",false)[0];
   const { getVoiceStates } = getModule(["getVoiceStates"], false);
   const { inject, uninject } = require("powercord/injector");
   const { patch } = getModule(["APIError", "patch"], false);
@@ -18,6 +9,7 @@ const {
   const { getGuild } = getModule(["getGuild"], false);
   const { getVoiceChannelId } = getModule(["getVoiceChannelId"], false);
   const { getChannels } = getModule(["getChannels"], false);
+  const { clipboard } = require('electron')
   
   const getuser = require("powercord/webpack").getModule(
 	["getCurrentUser"],
@@ -28,11 +20,7 @@ const {
 	  const can = (await getModule(["can", "canEveryone"])).can;
 	  const channelStore = await getModule(["getChannels"]);
   
-	  inject(
-		"voice-chat-utilities",
-		ChannelContextMenu,
-		"default",
-		(args, res) => {
+	  inject("voice-chat-utilities", ChannelContextMenu, "default", (args, res) => {
 		  let user = getuser.getCurrentUser(); //the user
 		  let channel = args[0].channel;
 		  
@@ -43,6 +31,33 @@ const {
 		  
 		  
 		  if (channelmembers < 1) return res;
+
+
+
+
+		  res.props.children.push(React.createElement(Menu.MenuGroup, null, React.createElement(Menu.MenuItem,{
+
+			
+			
+			  action: async () => {
+
+			
+			clipboard.writeText(channelmembers.join('\n'))
+
+			},
+			  id: "copy-all-vc-members",
+			  label: "Copy All User Ids",
+			
+
+
+
+
+
+		  })))
+
+
+
+
 		  if (channelmembers.length == 1 && channelmembers.includes(user.id))
 			return res;
 		  if (
@@ -301,7 +316,11 @@ const {
 		  );
 		  let element = React.createElement(Menu.MenuGroup, null, item);
   
+
+
+
 		  res.props.children.push(element);
+		  
 		  return res;
 		}
 	  );
