@@ -10,14 +10,23 @@ const {	getModule,	getAllModules,	React,	constants,  } = require("powercord/webp
   const { getVoiceChannelId } = getModule(["getVoiceChannelId"], false);
   const { getChannels } = getModule(["getChannels"], false);
   const { clipboard } = require('electron')
-  
-  const getuser = require("powercord/webpack").getModule(
-	["getCurrentUser"],
-	false
-  ); // thanks to Oocrop for showing me how to get the user's perms
+  const Settings = require('./Settings.jsx');
+
+
+
+  const getuser = require("powercord/webpack").getModule(	["getCurrentUser"],	false  ); // thanks to Oocrop for showing me how to get the user's perms
   module.exports = class VoiceChatUtilities extends Plugin {
 	async startPlugin() {
-	  const can = (await getModule(["can", "canEveryone"])).can;
+		powercord.api.settings.registerSettings('VoiceChatUtilities', {
+			category: this.entityID,
+			label: 'Voicechat Utilities',
+			render: Settings
+		  });
+	  
+
+
+
+		const can = (await getModule(["can", "canEveryone"])).can;
 	  const channelStore = await getModule(["getChannels"]);
   
 	  inject("voice-chat-utilities", ChannelContextMenu, "default", (args, res) => {
@@ -329,6 +338,7 @@ const {	getModule,	getAllModules,	React,	constants,  } = require("powercord/webp
 	}
 	pluginWillUnload() {
 	  uninject("voice-chat-utilities");
+	  powercord.api.settings.unregisterSettings('VoiceChatUtilities');
 	}
 	getVoiceUserIds(guild, channel) {
 	  return Object.values(getVoiceStates(guild))
