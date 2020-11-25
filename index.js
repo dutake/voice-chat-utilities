@@ -1,4 +1,4 @@
-const {	getModule,	getAllModules,	React,	constants,  } = require("powercord/webpack");
+const {getModule,getAllModules,React,constants,} = require("powercord/webpack");
   const ChannelContextMenu = getAllModules((m) =>m.default && m.default.displayName == "ChannelListVoiceChannelContextMenu",false)[0];
   const { getVoiceStates } = getModule(["getVoiceStates"], false);
   const { inject, uninject } = require("powercord/injector");
@@ -9,64 +9,48 @@ const {	getModule,	getAllModules,	React,	constants,  } = require("powercord/webp
   const { getGuild } = getModule(["getGuild"], false);
   const { getVoiceChannelId } = getModule(["getVoiceChannelId"], false);
   const { getChannels } = getModule(["getChannels"], false);
-  const { clipboard } = require('electron')
-  const Settings = require('./Settings.jsx');
-
-
-
-  const getuser = require("powercord/webpack").getModule(	["getCurrentUser"],	false  ); // thanks to Oocrop for showing me how to get the user's perms
-  module.exports = class VoiceChatUtilities extends Plugin {
+  const { clipboard } = require("electron");
+  const Settings = require("./Settings.jsx");
+  const { sleep } = require("powercord/util");
+  
+  const getuser = require("powercord/webpack").getModule(["getCurrentUser"],false); // thanks to Oocrop for showing me how to get the user's perms
+  module.exports = class VoiceChatUtilities extends (Plugin) {
 	async startPlugin() {
-		powercord.api.settings.registerSettings('VoiceChatUtilities', {
-			category: this.entityID,
-			label: 'Voicechat Utilities',
-			render: Settings
-		  });
-	  
-
-
-
-		const can = (await getModule(["can", "canEveryone"])).can;
+	  powercord.api.settings.registerSettings("VoiceChatUtilities", {
+		category: this.entityID,
+		label: "Voicechat Utilities",
+		render: Settings,
+	  });
+  
+	  const can = (await getModule(["can", "canEveryone"])).can;
 	  const channelStore = await getModule(["getChannels"]);
   
-	  inject("voice-chat-utilities", ChannelContextMenu, "default", (args, res) => {
+	  inject("voice-chat-utilities",ChannelContextMenu,"default",(args, res) => {
 		  let user = getuser.getCurrentUser(); //the user
 		  let channel = args[0].channel;
-		  
+  
 		  let channelmembers = this.getVoiceChannelMembers(channel.id);
-
+  
 		  const guildChannels = channelStore.getChannels(channel.guild_id);
 		  const voiceChannels = guildChannels[2].map(({ channel }) => channel);
-		  
-		  
+  
 		  if (channelmembers < 1) return res;
-
-
-
-
-		  res.props.children.push(React.createElement(Menu.MenuGroup, null, React.createElement(Menu.MenuItem,{
-
-			
-			
-			  action: async () => {
-
-			
-			clipboard.writeText(channelmembers.join('\n'))
-
-			},
-			  id: "copy-all-vc-members",
-			  label: "Copy All User Ids",
-			
-
-
-
-
-
-		  })))
-
-
-
-
+  
+		  if (this.settings.get("voicechatcopyids", false))
+			res.props.children.push(
+			  React.createElement(
+				Menu.MenuGroup,
+				null,
+				React.createElement(Menu.MenuItem, {
+				  action: async () => {
+					clipboard.writeText(channelmembers.join("\n"));
+				  },
+				  id: "copy-all-vc-members",
+				  label: "Copy All User Ids",
+				})
+			  )
+			);
+  
 		  if (channelmembers.length == 1 && channelmembers.includes(user.id))
 			return res;
 		  if (
@@ -76,9 +60,9 @@ const {	getModule,	getAllModules,	React,	constants,  } = require("powercord/webp
 		  )
 			return res;
 		  let currentChannel = this.getVoiceChannel();
-		  
-		  
-		  
+		  let delaybetweenactions =
+			this.settings.get("BulkActionsdelay", 0.25) * 1000;
+  
 		  let item = React.createElement(
 			Menu.MenuItem,
 			{
@@ -100,6 +84,8 @@ const {	getModule,	getAllModules,	React,	constants,  } = require("powercord/webp
 						  channel_id: null,
 						},
 					  });
+  
+					 if(delaybetweenactions != 0) await sleep(delaybetweenactions);
 					}
 				  },
 				  id: "disconnect-all-vc",
@@ -107,7 +93,8 @@ const {	getModule,	getAllModules,	React,	constants,  } = require("powercord/webp
 				},
   
 				getVoiceChannelId() == channel.id &&
-				  currentChannel.members.length > 1 && currentChannel &&
+				  currentChannel.members.length > 1 &&
+				  currentChannel &&
 				  React.createElement(Menu.MenuItem, {
 					action: async () => {
 					  for (const member of channelmembers) {
@@ -121,6 +108,7 @@ const {	getModule,	getAllModules,	React,	constants,  } = require("powercord/webp
 							channel_id: null,
 						  },
 						});
+						if(delaybetweenactions != 0) await sleep(delaybetweenactions);
 					  }
 					},
 					id: "disconnect-all-vc-except-self",
@@ -146,6 +134,7 @@ const {	getModule,	getAllModules,	React,	constants,  } = require("powercord/webp
 							channel_id: channel.id,
 						  },
 						});
+						if(delaybetweenactions != 0) await sleep(delaybetweenactions);
 					  }
 					},
   
@@ -172,6 +161,7 @@ const {	getModule,	getAllModules,	React,	constants,  } = require("powercord/webp
 						  mute: true,
 						},
 					  });
+					  if(delaybetweenactions != 0) await sleep(delaybetweenactions);
 					}
 				  },
 				  id: "mute-all-vc",
@@ -179,7 +169,8 @@ const {	getModule,	getAllModules,	React,	constants,  } = require("powercord/webp
 				},
   
 				getVoiceChannelId() == channel.id &&
-				  currentChannel.members.length > 1 && currentChannel &&
+				  currentChannel.members.length > 1 &&
+				  currentChannel &&
 				  React.createElement(Menu.MenuItem, {
 					action: async () => {
 					  for (const member of channelmembers) {
@@ -193,6 +184,7 @@ const {	getModule,	getAllModules,	React,	constants,  } = require("powercord/webp
 							mute: true,
 						  },
 						});
+						if(delaybetweenactions != 0) await sleep(delaybetweenactions);
 					  }
 					},
 					id: "mute-all-vc-except-self",
@@ -214,13 +206,15 @@ const {	getModule,	getAllModules,	React,	constants,  } = require("powercord/webp
 						  mute: false,
 						},
 					  });
+					  if(delaybetweenactions != 0) await sleep(delaybetweenactions);
 					}
 				  },
 				  id: "unmute-all-vc",
 				  label: "Unmute All",
 				},
 				getVoiceChannelId() == channel.id &&
-				  currentChannel.members.length > 1 && currentChannel &&
+				  currentChannel.members.length > 1 &&
+				  currentChannel &&
 				  React.createElement(Menu.MenuItem, {
 					action: async () => {
 					  for (const member of channelmembers) {
@@ -234,6 +228,7 @@ const {	getModule,	getAllModules,	React,	constants,  } = require("powercord/webp
 							mute: false,
 						  },
 						});
+						if(delaybetweenactions != 0) await sleep(delaybetweenactions);
 					  }
 					},
 					id: "unmute-all-vc-except-self",
@@ -255,13 +250,15 @@ const {	getModule,	getAllModules,	React,	constants,  } = require("powercord/webp
 						  deaf: true,
 						},
 					  });
+					  if(delaybetweenactions != 0) await sleep(delaybetweenactions);
 					}
 				  },
 				  id: "deafen-all-vc",
 				  label: "Deafen All",
 				},
 				getVoiceChannelId() == channel.id &&
-				  currentChannel.members.length > 1 && currentChannel &&
+				  currentChannel.members.length > 1 &&
+				  currentChannel &&
 				  React.createElement(Menu.MenuItem, {
 					action: async () => {
 					  for (const member of channelmembers) {
@@ -275,6 +272,7 @@ const {	getModule,	getAllModules,	React,	constants,  } = require("powercord/webp
 							deaf: true,
 						  },
 						});
+						if(delaybetweenactions != 0) await sleep(delaybetweenactions);
 					  }
 					},
 					id: "deafen-all-vc-except-self",
@@ -296,13 +294,15 @@ const {	getModule,	getAllModules,	React,	constants,  } = require("powercord/webp
 						  deaf: false,
 						},
 					  });
+					  if(delaybetweenactions != 0) await sleep(delaybetweenactions);
 					}
 				  },
 				  id: "undeafen-all-vc",
 				  label: "Undeafen All",
 				},
 				getVoiceChannelId() == channel.id &&
-				  currentChannel.members.length > 1 && currentChannel &&
+				  currentChannel.members.length > 1 &&
+				  currentChannel &&
 				  React.createElement(Menu.MenuItem, {
 					action: async () => {
 					  for (const member of channelmembers) {
@@ -316,6 +316,7 @@ const {	getModule,	getAllModules,	React,	constants,  } = require("powercord/webp
 							deaf: false,
 						  },
 						});
+						if(delaybetweenactions != 0) await sleep(delaybetweenactions);
 					  }
 					},
 					id: "undeafen-all-vc-except-self",
@@ -325,11 +326,8 @@ const {	getModule,	getAllModules,	React,	constants,  } = require("powercord/webp
 		  );
 		  let element = React.createElement(Menu.MenuGroup, null, item);
   
-
-
-
 		  res.props.children.push(element);
-		  
+  
 		  return res;
 		}
 	  );
@@ -338,7 +336,7 @@ const {	getModule,	getAllModules,	React,	constants,  } = require("powercord/webp
 	}
 	pluginWillUnload() {
 	  uninject("voice-chat-utilities");
-	  powercord.api.settings.unregisterSettings('VoiceChatUtilities');
+	  powercord.api.settings.unregisterSettings("VoiceChatUtilities");
 	}
 	getVoiceUserIds(guild, channel) {
 	  return Object.values(getVoiceStates(guild))
@@ -350,15 +348,12 @@ const {	getModule,	getAllModules,	React,	constants,  } = require("powercord/webp
 	  return this.getVoiceUserIds(channel.guild_id, channel.id);
 	}
 	getVoiceChannel() {
-	  
 	  let channel = getChannel(getVoiceChannelId());
-	 if(!channel) return;
+	  if (!channel) return;
 	  return {
 		channel: channel,
 		members: this.getVoiceUserIds(channel.guild_id, channel.id),
 	  };
-
-	
 	}
   };
   
