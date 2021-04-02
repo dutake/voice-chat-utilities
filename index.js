@@ -32,7 +32,7 @@ const {getModule,getAllModules,React,constants,} = require("powercord/webpack");
 		  let channelmembers = this.getVoiceChannelMembers(channel.id);
   
 		  const guildChannels = channelStore.getChannels(channel.guild_id);
-		  const voiceChannels = guildChannels[2].map(({ channel }) => channel);
+		  const voiceChannels = guildChannels.VOCAL.map(({ channel }) => channel);
   
 		  if (channelmembers < 1) return res;
   
