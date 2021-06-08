@@ -2,7 +2,7 @@ const {getModule,getAllModules,React,constants,} = require("powercord/webpack");
   const ChannelContextMenu = getAllModules((m) =>m.default && m.default.displayName == "ChannelListVoiceChannelContextMenu",false)[0];
   const { getVoiceStates } = getModule(["getVoiceStates"], false);
   const { inject, uninject } = require("powercord/injector");
-  const { patch } = getModule(["APIError", "patch"], false);
+  const { patch } = getModule(["V8APIError", "patch"], false);
   const Menu = getModule(["MenuGroup", "MenuItem"], false);
   const { getChannel } = getModule(["getChannel"], false);
   const { Plugin } = require("powercord/entities");
