@@ -344,8 +344,6 @@ module.exports = class VoiceChatUtilities extends (Plugin) {
 		
 				children.push(element);
 				children.push(res);
-
-				console.log(children)
 		
 				return children;
 			}
