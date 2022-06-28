@@ -11,6 +11,7 @@ const Settings = require("./Settings.jsx");
 const { sleep } = require("powercord/util");
   
 const getuser = require("powercord/webpack").getModule(["getCurrentUser"],false); // thanks to Oocrop for showing me how to get the user's perms
+
 module.exports = class VoiceChatUtilities extends (Plugin) {
     async startPlugin() {
 		powercord.api.settings.registerSettings("VoiceChatUtilities", {
@@ -22,6 +23,9 @@ module.exports = class VoiceChatUtilities extends (Plugin) {
 		const can = (await getModule(["getChannelPermissions"])).can;
 		const channelStore = await getModule(["getChannels"]);
 	
+		// Giving credit where credit is due,
+		// https://github.com/Tharki-God/BetterDiscordPlugins/blob/master/VoiceChatUtilities.plugin.js
+		// I referenced this in order to fix the entire plugin as a whole.
 		this.lazyPatchContextMenu('useChannelDeleteItem', async ContextMenu => {
 			inject('voice-chat-utilities', ContextMenu, 'default', (args, res) => {
 				let user = getuser.getCurrentUser(); //the user
