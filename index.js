@@ -1,10 +1,9 @@
 const {getModule,getAllModules,React,constants,} = require("powercord/webpack");
-  const ChannelContextMenu = getAllModules((m) =>m.default && m.default.displayName == "ChannelListVoiceChannelContextMenu",false)[0];
-  const { getVoiceStates } = getModule(["getVoiceStates"], false);
+  const { getVoiceStatesForChannel } = getModule(["getVoiceStatesForChannel"], false);
   const { inject, uninject } = require("powercord/injector");
   const { patch } = getModule(["V8APIError", "patch"], false);
   const Menu = getModule(["MenuGroup", "MenuItem"], false);
-  const { getChannel } = getModule(["getChannel"], false);
+  const { getChannel } = getModule(["getChannel", "getDMFromUserId"], false);
   const { Plugin } = require("powercord/entities");
   const { getGuild } = getModule(["getGuild"], false);
   const { getVoiceChannelId } = getModule(["getVoiceChannelId"], false);
@@ -25,19 +24,24 @@ const {getModule,getAllModules,React,constants,} = require("powercord/webpack");
 	  const can = (await getModule(["can", "canEveryone"])).can;
 	  const channelStore = await getModule(["getChannels"]);
   
-	  inject("voice-chat-utilities",ChannelContextMenu,"default",(args, res) => {
+	  this.lazyPatchContextMenu('useChannelDeleteItem', async Menu => {
+		inject('voice-chat-utilities', Menu, 'default', (args, res) => {
+			console.log(res, args);
+
 		  let user = getuser.getCurrentUser(); //the user
-		  let channel = args[0].channel;
+		  let channel = args[0];
   
 		  let channelmembers = this.getVoiceChannelMembers(channel.id);
   
 		  const guildChannels = channelStore.getChannels(channel.guild_id);
 		  const voiceChannels = guildChannels.VOCAL.map(({ channel }) => channel);
+
+		  let children = [];
   
-		  if (channelmembers < 1) return res;
+		  if (channelmembers.length < 1) return res;
   
 		  if (this.settings.get("voicechatcopyids", false))
-			res.props.children.push(
+			children.push(
 			  React.createElement(
 				Menu.MenuGroup,
 				null,
@@ -326,21 +330,19 @@ const {getModule,getAllModules,React,constants,} = require("powercord/webpack");
 		  );
 		  let element = React.createElement(Menu.MenuGroup, null, item);
   
-		  res.props.children.push(element);
+		  children.push(element);
+		  children.push(res);
   
-		  return res;
+		  return children;
 		}
-	  );
-	  ChannelContextMenu.default.displayName =
-		"ChannelListVoiceChannelContextMenu";
+	  )});
 	}
 	pluginWillUnload() {
 	  uninject("voice-chat-utilities");
 	  powercord.api.settings.unregisterSettings("VoiceChatUtilities");
 	}
 	getVoiceUserIds(guild, channel) {
-	  return Object.values(getVoiceStates(guild))
-		.filter((c) => c.channelId == channel)
+	  return Object.values(getVoiceStatesForChannel(channel))
 		.map((a) => a.userId);
 	}
 	getVoiceChannelMembers(id) {
@@ -355,5 +357,30 @@ const {getModule,getAllModules,React,constants,} = require("powercord/webpack");
 		members: this.getVoiceUserIds(channel.guild_id, channel.id),
 	  };
 	}
+	// Samm-Cheese's Lazy Context Menu patch
+	async lazyPatchContextMenu(displayName, patch) {
+        const filter = m => m.default && m.default.displayName === displayName
+        const m = getModule(filter, false)
+        if (m) patch(m)
+        else {
+            const module = getModule([ 'openContextMenuLazy' ], false)
+            inject('holy-context-lazy-menu', module, 'openContextMenuLazy', args => {
+                const lazyRender = args[1]
+                args[1] = async () => {
+                    const render = await lazyRender(args[0])
+                    return (config) => {
+                        const menu = render(config)
+                        if (menu?.type?.displayName === displayName && patch) {
+                            uninject('holy-context-lazy-menu')
+                            patch(getModule(filter, false))
+                            patch = false
+                        }
+                        return menu
+                    }
+                }
+                return args
+            }, true)
+        }
+  	}
   };
   
