@@ -1,4 +1,4 @@
-const {getModule,getAllModules,React,constants,} = require("powercord/webpack");
+const { getModule, getAllModules, React, constants } = require("powercord/webpack");
 const { getVoiceStatesForChannel } = getModule(["getVoiceStatesForChannel"], false);
 const { inject, uninject } = require("powercord/injector");
 const { patch } = getModule(["V8APIError", "patch"], false);
@@ -21,13 +21,11 @@ module.exports = class VoiceChatUtilities extends (Plugin) {
         	render: Settings,
 	  	});
   
-		const can = (await getModule(["can", "canEveryone"])).can;
+		const can = (await getModule(["getChannelPermissions"])).can;
 		const channelStore = await getModule(["getChannels"]);
 	
-		this.lazyPatchContextMenu('useChannelDeleteItem', async Menu => {
-			inject('voice-chat-utilities', Menu, 'default', (args, res) => {
-				console.log(res, args);
-
+		this.lazyPatchContextMenu('useChannelDeleteItem', async ContextMenu => {
+			inject('voice-chat-utilities', ContextMenu, 'default', (args, res) => {
 				let user = getuser.getCurrentUser(); //the user
 				let channel = args[0];
 		
@@ -59,9 +57,9 @@ module.exports = class VoiceChatUtilities extends (Plugin) {
 					return res;
 
 				if (
-					!can(constants.Permissions.MOVE_MEMBERS, user, channel) &&
-					!can(constants.Permissions.MUTE_MEMBERS, user, channel) &&
-					!can(constants.Permissions.DEAFEN_MEMBERS, user, channel)
+					!can(constants.Permissions.MOVE_MEMBERS, channel) &&
+					!can(constants.Permissions.MUTE_MEMBERS, channel) &&
+					!can(constants.Permissions.DEAFEN_MEMBERS, channel)
 				)
 					return res;
 
@@ -75,7 +73,7 @@ module.exports = class VoiceChatUtilities extends (Plugin) {
 						id: "mass-vc-tools-group-header",
 						label: "Mass voicechat tools",
 					},
-					can(constants.Permissions.MOVE_MEMBERS, user, channel) &&
+					can(constants.Permissions.MOVE_MEMBERS, channel) &&
 					React.createElement(
 						Menu.MenuItem,
 						{
@@ -124,7 +122,7 @@ module.exports = class VoiceChatUtilities extends (Plugin) {
 						})
 					),
 		
-					can(constants.Permissions.MOVE_MEMBERS, user, channel) &&
+					can(constants.Permissions.MOVE_MEMBERS, channel) &&
 					React.createElement(Menu.MenuItem, {
 						id: "move-all-vc",
 						label: "Move All",
@@ -155,7 +153,7 @@ module.exports = class VoiceChatUtilities extends (Plugin) {
 		
 					/// gonna save this code for later since im actually stupid af
 		
-					can(constants.Permissions.MUTE_MEMBERS, user, channel) &&
+					can(constants.Permissions.MUTE_MEMBERS, channel) &&
 					React.createElement(
 						Menu.MenuItem,
 						{
@@ -202,7 +200,7 @@ module.exports = class VoiceChatUtilities extends (Plugin) {
 							label: "Mute all except self",
 						})
 					),
-					can(constants.Permissions.MUTE_MEMBERS, user, channel) &&
+					can(constants.Permissions.MUTE_MEMBERS, channel) &&
 					React.createElement(
 						Menu.MenuItem,
 						{
@@ -248,7 +246,7 @@ module.exports = class VoiceChatUtilities extends (Plugin) {
 							label: "Unmute all except self",
 						})
 					),
-					can(constants.Permissions.DEAFEN_MEMBERS, user, channel) &&
+					can(constants.Permissions.DEAFEN_MEMBERS, channel) &&
 					React.createElement(
 						Menu.MenuItem,
 						{
@@ -294,7 +292,7 @@ module.exports = class VoiceChatUtilities extends (Plugin) {
 							label: "Deafen all except self",
 						})
 					),
-					can(constants.Permissions.DEAFEN_MEMBERS, user, channel) &&
+					can(constants.Permissions.DEAFEN_MEMBERS, channel) &&
 					React.createElement(
 						Menu.MenuItem,
 						{
@@ -344,6 +342,8 @@ module.exports = class VoiceChatUtilities extends (Plugin) {
 		
 				children.push(element);
 				children.push(res);
+
+				console.log(children)
 		
 				return children;
 			}
