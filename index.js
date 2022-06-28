@@ -1,16 +1,17 @@
 const { getModule, React, constants } = require("powercord/webpack");
-const { getVoiceStatesForChannel } = getModule(["getVoiceStatesForChannel"], false);
 const { inject, uninject } = require("powercord/injector");
-const { patch } = getModule(["V8APIError", "patch"], false);
-const Menu = getModule(["MenuGroup", "MenuItem"], false);
-const { getChannel } = getModule(["getChannel", "getDMFromUserId"], false);
 const { Plugin } = require("powercord/entities");
-const { getVoiceChannelId } = getModule(["getVoiceChannelId"], false);
 const { clipboard } = require("electron");
 const Settings = require("./Settings.jsx");
 const { sleep } = require("powercord/util");
+
+const { getVoiceStatesForChannel } = getModule(["getVoiceStatesForChannel"], false);
+const { patch } = getModule(["V8APIError", "patch"], false);
+const Menu = getModule(["MenuGroup", "MenuItem"], false);
+const { getChannel } = getModule(["getChannel", "getDMFromUserId"], false);
+const { getVoiceChannelId } = getModule(["getVoiceChannelId"], false);
   
-const getuser = require("powercord/webpack").getModule(["getCurrentUser"],false); // thanks to Oocrop for showing me how to get the user's perms
+const getuser = getModule(["getCurrentUser"], false); // thanks to Oocrop for showing me how to get the user's perms
 
 module.exports = class VoiceChatUtilities extends (Plugin) {
     async startPlugin() {
