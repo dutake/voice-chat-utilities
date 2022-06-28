@@ -42,27 +42,29 @@ module.exports = class VoiceChatUtilities extends (Plugin) {
 		
 				if (this.settings.get("voicechatcopyids", false))
 					children.push(
-					React.createElement(
-						Menu.MenuGroup,
-						null,
-						React.createElement(Menu.MenuItem, {
-						action: async () => {
-							clipboard.writeText(channelmembers.join("\n"));
-						},
-						id: "copy-all-vc-members",
-						label: "Copy All User Ids",
-						})
-					)
+						React.createElement(
+							Menu.MenuGroup,
+							null,
+							React.createElement(Menu.MenuItem, {
+								action: async () => {
+									clipboard.writeText(channelmembers.join("\n"));
+								},
+								id: "copy-all-vc-members",
+								label: "Copy All User Ids",
+							})
+						)
 					);
 		
 				if (channelmembers.length == 1 && channelmembers.includes(user.id))
 					return res;
+
 				if (
 					!can(constants.Permissions.MOVE_MEMBERS, user, channel) &&
 					!can(constants.Permissions.MUTE_MEMBERS, user, channel) &&
 					!can(constants.Permissions.DEAFEN_MEMBERS, user, channel)
 				)
 					return res;
+
 				let currentChannel = this.getVoiceChannel();
 				let delaybetweenactions =
 					this.settings.get("BulkActionsdelay", 0.25) * 1000;
@@ -79,17 +81,17 @@ module.exports = class VoiceChatUtilities extends (Plugin) {
 						{
 							action: async () => {
 								for (const member of channelmembers) {
-								patch({
-									url: constants.Endpoints.GUILD_MEMBER(
-									channel.guild_id,
-									member
-									),
-									body: {
-									channel_id: null,
-									},
-								});
-			
-								if(delaybetweenactions != 0) await sleep(delaybetweenactions);
+									patch({
+										url: constants.Endpoints.GUILD_MEMBER(
+											channel.guild_id,
+											member
+										),
+										body: {
+											channel_id: null,
+										},
+									});
+				
+									if(delaybetweenactions != 0) await sleep(delaybetweenactions);
 								}
 							},
 							id: "disconnect-all-vc",
@@ -101,19 +103,21 @@ module.exports = class VoiceChatUtilities extends (Plugin) {
 						currentChannel &&
 						React.createElement(Menu.MenuItem, {
 							action: async () => {
-							for (const member of channelmembers) {
-								if (member == user.id) continue;
-								patch({
-								url: constants.Endpoints.GUILD_MEMBER(
-									channel.guild_id,
-									member
-								),
-								body: {
-									channel_id: null,
-								},
-								});
-								if(delaybetweenactions != 0) await sleep(delaybetweenactions);
-							}
+								for (const member of channelmembers) {
+									if (member == user.id) continue;
+
+									patch({
+										url: constants.Endpoints.GUILD_MEMBER(
+											channel.guild_id,
+											member
+										),
+										body: {
+											channel_id: null,
+										},
+									});
+
+									if (delaybetweenactions != 0) await sleep(delaybetweenactions);
+								}
 							},
 							id: "disconnect-all-vc-except-self",
 							label: "Disconnect all except self",
@@ -128,18 +132,19 @@ module.exports = class VoiceChatUtilities extends (Plugin) {
 						children: voiceChannels.map((channel) =>
 						React.createElement(Menu.MenuItem, {
 							action: async () => {
-							for (const member of channelmembers) {
-								patch({
-								url: constants.Endpoints.GUILD_MEMBER(
-									channel.guild_id,
-									member
-								),
-								body: {
-									channel_id: channel.id,
-								},
-								});
-								if(delaybetweenactions != 0) await sleep(delaybetweenactions);
-							}
+								for (const member of channelmembers) {
+									patch({
+										url: constants.Endpoints.GUILD_MEMBER(
+											channel.guild_id,
+											member
+										),
+										body: {
+											channel_id: channel.id,
+										},
+									});
+
+									if (delaybetweenactions != 0) await sleep(delaybetweenactions);
+								}
 							},
 		
 							id: channel.id,
@@ -156,16 +161,17 @@ module.exports = class VoiceChatUtilities extends (Plugin) {
 						{
 							action: async () => {
 								for (const member of channelmembers) {
-								patch({
-									url: constants.Endpoints.GUILD_MEMBER(
-									channel.guild_id,
-									member
-									),
-									body: {
-									mute: true,
-									},
-								});
-								if(delaybetweenactions != 0) await sleep(delaybetweenactions);
+									patch({
+										url: constants.Endpoints.GUILD_MEMBER(
+											channel.guild_id,
+											member
+										),
+										body: {
+											mute: true,
+										},
+									});
+
+									if (delaybetweenactions != 0) await sleep(delaybetweenactions);
 								}
 							},
 							id: "mute-all-vc",
@@ -177,19 +183,20 @@ module.exports = class VoiceChatUtilities extends (Plugin) {
 						currentChannel &&
 						React.createElement(Menu.MenuItem, {
 							action: async () => {
-							for (const member of channelmembers) {
-								if (member == user.id) continue;
-								patch({
-								url: constants.Endpoints.GUILD_MEMBER(
-									channel.guild_id,
-									member
-								),
-								body: {
-									mute: true,
-								},
-								});
-								if(delaybetweenactions != 0) await sleep(delaybetweenactions);
-							}
+								for (const member of channelmembers) {
+									if (member == user.id) continue;
+										patch({
+										url: constants.Endpoints.GUILD_MEMBER(
+											channel.guild_id,
+											member
+										),
+										body: {
+											mute: true,
+										},
+									});
+
+									if (delaybetweenactions != 0) await sleep(delaybetweenactions);
+								}
 							},
 							id: "mute-all-vc-except-self",
 							label: "Mute all except self",
@@ -201,16 +208,17 @@ module.exports = class VoiceChatUtilities extends (Plugin) {
 						{
 							action: async () => {
 								for (const member of channelmembers) {
-								patch({
-									url: constants.Endpoints.GUILD_MEMBER(
-									channel.guild_id,
-									member
-									),
-									body: {
-									mute: false,
-									},
-								});
-								if(delaybetweenactions != 0) await sleep(delaybetweenactions);
+									patch({
+										url: constants.Endpoints.GUILD_MEMBER(
+											channel.guild_id,
+											member
+										),
+										body: {
+											mute: false,
+										},
+									});
+
+									if (delaybetweenactions != 0) await sleep(delaybetweenactions);
 								}
 							},
 							id: "unmute-all-vc",
@@ -223,16 +231,17 @@ module.exports = class VoiceChatUtilities extends (Plugin) {
 							action: async () => {
 								for (const member of channelmembers) {
 									if (member == user.id) continue;
-									patch({
-									url: constants.Endpoints.GUILD_MEMBER(
-										channel.guild_id,
-										member
-									),
-									body: {
-										mute: false,
-									},
+										patch({
+										url: constants.Endpoints.GUILD_MEMBER(
+											channel.guild_id,
+											member
+										),
+										body: {
+											mute: false,
+										},
 									});
-									if(delaybetweenactions != 0) await sleep(delaybetweenactions);
+
+									if (delaybetweenactions != 0) await sleep(delaybetweenactions);
 								}
 							},
 							id: "unmute-all-vc-except-self",
@@ -245,16 +254,16 @@ module.exports = class VoiceChatUtilities extends (Plugin) {
 						{
 							action: async () => {
 								for (const member of channelmembers) {
-								patch({
-									url: constants.Endpoints.GUILD_MEMBER(
-									channel.guild_id,
-									member
-									),
-									body: {
-									deaf: true,
-									},
-								});
-								if(delaybetweenactions != 0) await sleep(delaybetweenactions);
+									patch({
+										url: constants.Endpoints.GUILD_MEMBER(
+											channel.guild_id,
+											member
+										),
+										body: {
+											deaf: true,
+										},
+									});
+									if(delaybetweenactions != 0) await sleep(delaybetweenactions);
 								}
 							},
 							id: "deafen-all-vc",
@@ -267,16 +276,18 @@ module.exports = class VoiceChatUtilities extends (Plugin) {
 							action: async () => {
 							for (const member of channelmembers) {
 								if (member == user.id) continue;
+
 								patch({
-								url: constants.Endpoints.GUILD_MEMBER(
-									channel.guild_id,
-									member
-								),
-								body: {
-									deaf: true,
-								},
+									url: constants.Endpoints.GUILD_MEMBER(
+										channel.guild_id,
+										member
+									),
+									body: {
+										deaf: true,
+									},
 								});
-								if(delaybetweenactions != 0) await sleep(delaybetweenactions);
+
+								if (delaybetweenactions != 0) await sleep(delaybetweenactions);
 							}
 							},
 							id: "deafen-all-vc-except-self",
@@ -289,16 +300,16 @@ module.exports = class VoiceChatUtilities extends (Plugin) {
 						{
 							action: async () => {
 								for (const member of channelmembers) {
-								patch({
-									url: constants.Endpoints.GUILD_MEMBER(
-									channel.guild_id,
-									member
-									),
-									body: {
-									deaf: false,
-									},
-								});
-								if(delaybetweenactions != 0) await sleep(delaybetweenactions);
+									patch({
+										url: constants.Endpoints.GUILD_MEMBER(
+											channel.guild_id,
+											member
+										),
+										body: {
+											deaf: false,
+										},
+									});
+									if (delaybetweenactions != 0) await sleep(delaybetweenactions);
 								}
 							},
 							id: "undeafen-all-vc",
@@ -311,16 +322,17 @@ module.exports = class VoiceChatUtilities extends (Plugin) {
 							action: async () => {
 								for (const member of channelmembers) {
 									if (member == user.id) continue;
-									patch({
-									url: constants.Endpoints.GUILD_MEMBER(
-										channel.guild_id,
-										member
-									),
-									body: {
-										deaf: false,
-									},
+										patch({
+										url: constants.Endpoints.GUILD_MEMBER(
+											channel.guild_id,
+											member
+										),
+										body: {
+											deaf: false,
+										},
 									});
-									if(delaybetweenactions != 0) await sleep(delaybetweenactions);
+
+									if (delaybetweenactions != 0) await sleep(delaybetweenactions);
 								}
 							},
 							id: "undeafen-all-vc-except-self",
@@ -334,7 +346,7 @@ module.exports = class VoiceChatUtilities extends (Plugin) {
 				children.push(res);
 		
 				return children;
-				}
+			}
 		)});
 	}
 	pluginWillUnload() {
