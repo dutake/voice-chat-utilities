@@ -1,13 +1,11 @@
-const { getModule, getAllModules, React, constants } = require("powercord/webpack");
+const { getModule, React, constants } = require("powercord/webpack");
 const { getVoiceStatesForChannel } = getModule(["getVoiceStatesForChannel"], false);
 const { inject, uninject } = require("powercord/injector");
 const { patch } = getModule(["V8APIError", "patch"], false);
 const Menu = getModule(["MenuGroup", "MenuItem"], false);
 const { getChannel } = getModule(["getChannel", "getDMFromUserId"], false);
 const { Plugin } = require("powercord/entities");
-const { getGuild } = getModule(["getGuild"], false);
 const { getVoiceChannelId } = getModule(["getVoiceChannelId"], false);
-const { getChannels } = getModule(["getChannels"], false);
 const { clipboard } = require("electron");
 const Settings = require("./Settings.jsx");
 const { sleep } = require("powercord/util");
